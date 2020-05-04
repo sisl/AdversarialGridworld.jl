@@ -87,7 +87,7 @@ function generate_task(;map_rng = MersenneTwister(0),
      adv_mdp
 end
 
-function generate_task_set(seed, N; folder = nothing, save = false)
+function generate_task_set(seed, N; folder = nothing, save = false, lzeros = 2)
     try mkdir(folder) catch end
     rng = MersenneTwister(seed)
     tasks = []
@@ -96,21 +96,40 @@ function generate_task_set(seed, N; folder = nothing, save = false)
         t = generate_task(task_rng = rng, verbose = false)
         push!(tasks, t)
         if save
-            serialize(string(folder, "/task_", i, ".jls"), t)
+            name = string(folder, "/task_", lpad(i, lzeros, "0"), ".jls")
+            println("writing ", name)
+            serialize(name, t)
         end
     end
     tasks
 end
 
-function load_task_set(folder)
-    files = readdir(folder)
-    tasks = []
-    for f in files
-        t = deserialize(string(folder,"/",f))
-        push!(tasks, t)
+function solve_for_policies(tasks; folder = nothing, save = false, lzeros = 2)
+    try mkdir(folder) catch end
+    policies = []
+    for i in 1:length(tasks)
+        t = tasks[i]
+        pol = solve_for_policy(t, verbose = false)
+        push!(policies, pol)
+        if save
+            name = string(folder, "/policy_", lpad(i, lzeros, "0"), ".jls")
+            println("writing ", name)
+            serialize(name, pol)
+        end
     end
-    return tasks
+    policies
 end
+
+function load_items(folder)
+    files = readdir(folder)
+    items = []
+    for f in files
+        i = deserialize(string(folder,"/",f))
+        push!(items, i)
+    end
+    return items
+end
+
 
 function evaluate_policies(tasks, policies, trials, rng::AbstractRNG = Random.GLOBAL_RNG)
     r = 0
@@ -123,3 +142,4 @@ function evaluate_policies(tasks, policies, trials, rng::AbstractRNG = Random.GL
     end
     r / (length(tasks)*trials)
 end
+
