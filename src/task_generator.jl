@@ -87,13 +87,13 @@ function generate_task(;map_rng = MersenneTwister(0),
      adv_mdp
 end
 
-function generate_task_set(seed, N; folder = nothing, save = false, lzeros = 2)
+function generate_task_set(seed, N; tprob_test = 0.7, folder = nothing, save = false, lzeros = 2)
     try mkdir(folder) catch end
     rng = MersenneTwister(seed)
     tasks = []
     for i=1:N
         println("Generating task ", i, " in ", folder)
-        t = generate_task(task_rng = rng, verbose = false)
+        t = generate_task(task_rng = rng, verbose = false, tprob_test = tprob_test)
         push!(tasks, t)
         if save
             name = string(folder, "/task_", lpad(i, lzeros, "0"), ".jls")

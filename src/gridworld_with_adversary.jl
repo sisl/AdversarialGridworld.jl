@@ -90,7 +90,7 @@ POMDPs.gen(::DDNOut{(:sp, :r)}, mdp::GridworldAdversary, s::S, a::A, rng::Abstra
 # Returns the reward for the provided state
 function POMDPs.reward(mdp::GridworldAdversary, s::S)
     isterminal(mdp, s) && return 0
-    r = get(mdp.rewards, ego_pos(s), 0.0) - mdp.failure_penalty*agents_overlap(s)
+    r = (get(mdp.rewards, ego_pos(s), 0.0) - mdp.failure_penalty*agents_overlap(s)) /  mdp.failure_penalty
     mdp.agent_gets_action == :ego ? r : -r
 end
 
