@@ -14,7 +14,7 @@ module AdversarialGridworld
     using POMDPSimulators
     using Statistics
 
-    export GWPos, TwoAgentPos, aind, dir, syma, AdversarialGridworld, valid_pos,
+    export GWPos, TwoAgentPos, aind, dir, syma, AdversarialGridworldMDP, valid_pos,
             random_valid_pos, ego_pos, adversary_pos, agents_overlap
     include("mdp.jl")
 
