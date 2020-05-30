@@ -1,0 +1,4 @@
+name = "AdversarialGridworld"
+uuid = "f8394dfe-2452-4386-a2b1-ee52e0ba54cf"
+authors = ["Anthony Corso <anthonycorso92@gmail.com>"]
+version = "0.1.0"

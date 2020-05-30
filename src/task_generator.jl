@@ -1,12 +1,3 @@
-include("gridworld_with_adversary.jl")
-
-using LocalApproximationValueIteration
-using GridInterpolations
-using LocalFunctionApproximation
-using Serialization
-using POMDPSimulators
-using Statistics
-
 # Computes the average undiscounted perfromance of a policy
 function average_performance(t, p, Neps)
     vals = zeros(Neps)
@@ -89,7 +80,7 @@ function generate_task(;map_rng = MersenneTwister(0),
     end
 
     # Create the mdp that will be solved for the policy (perturbed rewards)
-    mdp = GridworldAdversary(rewards = perturbed_rewards,
+    mdp = AdversarialGridworld(rewards = perturbed_rewards,
                              walls = walls,
                              tprob = tprob_train,
                              failure_penalty = perturbed_penalty)
@@ -102,7 +93,7 @@ function generate_task(;map_rng = MersenneTwister(0),
 
     # Construct the adversarial mdp with the solved ego policy with a reward that
     # is consistent across tasks
-    adv_mdp = GridworldAdversary(rewards = rewards,
+    adv_mdp = AdversarialGridworld(rewards = rewards,
                                  walls = walls,
                                  agent_gets_action = :adversary,
                                  tprob = 1,

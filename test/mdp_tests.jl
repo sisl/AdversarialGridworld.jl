@@ -1,6 +1,6 @@
+using AdversarialGridworld
 using Test
 using Random
-include("../src/gridworld_with_adversary.jl")
 
 @test GWPos == SVector{2,Int}
 @test TwoAgentPos == SVector{4,Int}
@@ -10,8 +10,8 @@ include("../src/gridworld_with_adversary.jl")
 @test syma == [:up, :down, :left, :right, :stay, :upleft, :upright, :downleft, :downright]
 
 # Test construction
-mdp = GridworldAdversary(rewards = Dict(GWPos(1,1) => 1, GWPos(10,10) => 2, GWPos(1,10) => -1, GWPos(10,1) => -2), walls = [GWPos(5,5), GWPos(5,6), GWPos(5,7)])
-amdp = GridworldAdversary(agent_gets_action = :adversary, rewards = Dict(GWPos(1,1) => 1, GWPos(10,10) => 2, GWPos(1,10) => -1, GWPos(10,1) => -2), walls = [GWPos(5,5), GWPos(5,6), GWPos(5,7)])
+mdp = AdversarialGridworld(rewards = Dict(GWPos(1,1) => 1, GWPos(10,10) => 2, GWPos(1,10) => -1, GWPos(10,1) => -2), walls = [GWPos(5,5), GWPos(5,6), GWPos(5,7)])
+amdp = AdversarialGridworld(agent_gets_action = :adversary, rewards = Dict(GWPos(1,1) => 1, GWPos(10,10) => 2, GWPos(1,10) => -1, GWPos(10,1) => -2), walls = [GWPos(5,5), GWPos(5,6), GWPos(5,7)])
 @test mdp.size == (10,10)
 @test mdp.rewards[GWPos(10,10)] == 2
 @test GWPos(5,5) in mdp.walls
@@ -80,4 +80,4 @@ gen(mdp, S(1,1,3,4), :up)
 @test reward(amdp, S(1,2,2,1)) == 0
 
 
-render(mdp, initialstate(mdp))
+# render(mdp, initialstate(mdp))

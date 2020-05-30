@@ -1,12 +1,3 @@
-using POMDPs
-using POMDPModelTools
-using StaticArrays
-using Parameters
-using Base.Cartesian
-using Random
-using Compose
-using ColorSchemes
-
 const GWPos = SVector{2,Int}
 const TwoAgentPos = SVector{4,Int}
 const dir = Dict(:up=>GWPos(0,1), :down=>GWPos(0,-1), :left=>GWPos(-1,0), :right=>GWPos(1,0), :stay=>GWPos(0,0),
@@ -17,7 +8,7 @@ const S = TwoAgentPos
 const A = Symbol
 
 # Gridworld with adversary
-@with_kw mutable struct GridworldAdversary <:MDP{S, A}
+@with_kw mutable struct AdversarialGridworld <:MDP{S, A}
     size::Tuple{Int, Int} = (10,10)
     rewards::Dict{GWPos, Float64} = Dict()
     walls::Vector{GWPos} = []
@@ -31,7 +22,7 @@ end
 
 valid_pos(mdp, pos::GWPos) = !(pos in mdp.walls || any((pos .> mdp.size) .| (pos .< GWPos(1,1))))
 
-function random_valid_pos(mdp::GridworldAdversary, rng::AbstractRNG = Random.GLOBAL_RNG, exclude = [], max_trials = 1000)
+function random_valid_pos(mdp::AdversarialGridworld, rng::AbstractRNG = Random.GLOBAL_RNG, exclude = [], max_trials = 1000)
     trial = 0
     while trial < max_trials
         pos = GWPos(rand(rng, 1:mdp.size[1]), rand(rng, 1:mdp.size[2]))
@@ -42,25 +33,25 @@ function random_valid_pos(mdp::GridworldAdversary, rng::AbstractRNG = Random.GLO
     end
  end
 
-function POMDPs.initialstate(mdp::GridworldAdversary, rng::AbstractRNG = Random.GLOBAL_RNG)
+function POMDPs.initialstate(mdp::AdversarialGridworld, rng::AbstractRNG = Random.GLOBAL_RNG)
     ego = random_valid_pos(mdp, rng)
     adversary = random_valid_pos(mdp, rng, [ego])
     S(ego..., adversary...)
 end
 
-POMDPs.actions(mdp::GridworldAdversary) = syma
-POMDPs.actionindex(mdp::GridworldAdversary, a::A) = aind[a]
+POMDPs.actions(mdp::AdversarialGridworld) = syma
+POMDPs.actionindex(mdp::AdversarialGridworld, a::A) = aind[a]
 
 ego_pos(s::S) = GWPos(s[1], s[2])
 adversary_pos(s::S) = GWPos(s[3], s[4])
 agents_overlap(s::S) = ego_pos(s) == adversary_pos(s)
 
 
-POMDPs.isterminal(mdp::GridworldAdversary, s::S) = any(s .< 0)
-POMDPs.discount(mdp::GridworldAdversary) = mdp.discount
+POMDPs.isterminal(mdp::AdversarialGridworld, s::S) = any(s .< 0)
+POMDPs.discount(mdp::AdversarialGridworld) = mdp.discount
 
 # Returns a sample next state and reward
-function POMDPs.gen(mdp::GridworldAdversary, s::S, a::A, rng::AbstractRNG = Random.GLOBAL_RNG)
+function POMDPs.gen(mdp::AdversarialGridworld, s::S, a::A, rng::AbstractRNG = Random.GLOBAL_RNG)
     if haskey(mdp.rewards, ego_pos(s)) || agents_overlap(s) || isterminal(mdp, s)
         return (sp = S(-1,-1,-1,-1), r = reward(mdp, s))
     else
@@ -85,16 +76,15 @@ function POMDPs.gen(mdp::GridworldAdversary, s::S, a::A, rng::AbstractRNG = Rand
     end
 end
 
-POMDPs.gen(::DDNOut{(:sp, :r)}, mdp::GridworldAdversary, s::S, a::A, rng::AbstractRNG = Random.GLOBAL_RNG) = gen(mdp, s, a, rng)
 
 # Returns the reward for the provided state
-function POMDPs.reward(mdp::GridworldAdversary, s::S)
+function POMDPs.reward(mdp::AdversarialGridworld, s::S)
     isterminal(mdp, s) && return 0
     r = (get(mdp.rewards, ego_pos(s), 0.0) - mdp.failure_penalty*agents_overlap(s)) /  mdp.failure_penalty
     mdp.agent_gets_action == :ego ? r : -r
 end
 
-function tocolor(mdp::GridworldAdversary, r::Float64)
+function tocolor(mdp::AdversarialGridworld, r::Float64)
     maxr = maximum(values(mdp.rewards))
     minr = -maxr
     frac = (r-minr)/(maxr-minr)
@@ -102,7 +92,7 @@ function tocolor(mdp::GridworldAdversary, r::Float64)
 end
 
 # Renders the mdp
-function POMDPModelTools.render(mdp::GridworldAdversary, s::S)
+function POMDPModelTools.render(mdp::AdversarialGridworld, s::S)
     nx, ny = mdp.size
     cells = []
     for x in 1:nx, y in 1:ny
