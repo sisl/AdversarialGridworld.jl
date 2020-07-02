@@ -112,18 +112,22 @@ function POMDPModelTools.render(mdp::AdversarialGridworldMDP, s::S)
     grid = compose(context(), Compose.stroke("gray"), cells...)
     outline = compose(context(), rectangle())
 
+    if all(s .> 0)
+        x,y = ego_pos(s)
+        agent_ctx = context((x-1)/nx, (ny-y)/ny, 1/nx, 1/ny)
+        ego = compose(agent_ctx, circle(0.5, 0.5, 0.4), Compose.stroke("black"), fill("blue"))
 
-    x,y = ego_pos(s)
-    agent_ctx = context((x-1)/nx, (ny-y)/ny, 1/nx, 1/ny)
-    ego = compose(agent_ctx, circle(0.5, 0.5, 0.4), Compose.stroke("black"), fill("blue"))
+        x,y = adversary_pos(s)
+        agent_ctx = context((x-1)/nx, (ny-y)/ny, 1/nx, 1/ny)
+        adversary = compose(agent_ctx, circle(0.5, 0.5, 0.4), Compose.stroke("black"), fill("orange"))
 
-    x,y = adversary_pos(s)
-    agent_ctx = context((x-1)/nx, (ny-y)/ny, 1/nx, 1/ny)
-    adversary = compose(agent_ctx, circle(0.5, 0.5, 0.4), Compose.stroke("black"), fill("orange"))
+        agents_comp = compose(context(), ego, adversary)
 
-    agents_comp = compose(context(), ego, adversary)
-
-    sz = min(w, h)
-    return compose(context((w-sz)/2, (h-sz)/2, sz, sz), agents_comp, grid, outline)
+        sz = min(w, h)
+        return compose(context((w-sz)/2, (h-sz)/2, sz, sz), agents_comp, grid, outline)
+    else
+        sz = min(w, h)
+        return compose(context((w-sz)/2, (h-sz)/2, sz, sz), grid, outline)
+    end
 end
 
