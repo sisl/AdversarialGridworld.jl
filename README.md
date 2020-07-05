@@ -17,3 +17,5 @@ Construct an `AdversarialGridworldMDP` with the following arguments
 
 
 The file `src/task_generator.jl` contains utilities for generating variations of the gridworld that can be used for transfer learning and meta learning test cases.
+
+Maintained by Anthony Corso (acorso@stanford.edu)
