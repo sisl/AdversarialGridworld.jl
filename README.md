@@ -1,4 +1,6 @@
 # AdversarialGridworld.jl
+[![Build Status](https://travis-ci.org/sisl/AdversarialGridworld.jl.svg?branch=master)](https://travis-ci.org/sisl/AdversarialGridworld.jl) [![Coverage Status](https://coveralls.io/repos/github/sisl/AdversarialGridworld.jl/badge.svg?branch=master)](https://coveralls.io/github/sisl/AdversarialGridworld.jl?branch=master) [![codecov](https://codecov.io/gh/sisl/AdversarialGridworld.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/sisl/AdversarialGridworld.jl)
+
 Defines a Gridworld MDP with two agents: the ego and the adversary. The goal of the ego agent (in blue) is to reach a reward square (in green) before the adversary (in orange) is able to overlap with the ego causing a failure.
 
 ![sample gridworld](adversarial_gridworld.png)
