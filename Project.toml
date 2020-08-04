@@ -4,8 +4,10 @@ authors = ["Anthony Corso <anthonycorso92@gmail.com>"]
 version = "0.1.0"
 
 [deps]
+Cairo = "159f3aea-2a34-519c-b102-8c37f9878175"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
 Compose = "a81c6b42-2e10-5240-aca2-a61377ecd94b"
+Fontconfig = "186bb1d3-e1f7-5a2c-a377-96d770f13627"
 GridInterpolations = "bb4c363b-b914-514b-8517-4eb369bc008a"
 LocalApproximationValueIteration = "a40420fb-f401-52da-a663-f502e5b95060"
 LocalFunctionApproximation = "db97f5ab-fc25-52dd-a8f9-02a257c35074"

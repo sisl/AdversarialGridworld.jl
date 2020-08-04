@@ -106,20 +106,20 @@ function POMDPModelTools.render(mdp::AdversarialGridworldMDP, s::S)
         elseif !isnothing(wall_index)
             color = "black"
         end
-        cell = compose(ctx, rectangle(), fill(color))
+        cell = compose(ctx, Compose.rectangle(), fill(color))
         push!(cells, cell)
     end
     grid = compose(context(), Compose.stroke("gray"), cells...)
-    outline = compose(context(), rectangle())
+    outline = compose(context(), Compose.rectangle())
 
     if all(s .> 0)
         x,y = ego_pos(s)
         agent_ctx = context((x-1)/nx, (ny-y)/ny, 1/nx, 1/ny)
-        ego = compose(agent_ctx, circle(0.5, 0.5, 0.4), Compose.stroke("black"), fill("blue"))
+        ego = compose(agent_ctx, Compose.circle(0.5, 0.5, 0.4), Compose.stroke("black"), fill("blue"))
 
         x,y = adversary_pos(s)
         agent_ctx = context((x-1)/nx, (ny-y)/ny, 1/nx, 1/ny)
-        adversary = compose(agent_ctx, circle(0.5, 0.5, 0.4), Compose.stroke("black"), fill("orange"))
+        adversary = compose(agent_ctx, Compose.circle(0.5, 0.5, 0.4), Compose.stroke("black"), fill("orange"))
 
         agents_comp = compose(context(), ego, adversary)
 

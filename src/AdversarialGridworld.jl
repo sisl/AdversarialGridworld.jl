@@ -13,6 +13,7 @@ module AdversarialGridworld
     using Serialization
     using POMDPSimulators
     using Statistics
+    using Cairo, Fontconfig
 
     export GWPos, TwoAgentPos, aind, dir, syma, AdversarialGridworldMDP, valid_pos,
             random_valid_pos, ego_pos, adversary_pos, agents_overlap

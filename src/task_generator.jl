@@ -100,24 +100,29 @@ function generate_task(;map_rng = MersenneTwister(0),
                                  ego_policy = (s, rng) -> rand(rng) < tprob_test ? policy_table[s...] : rand(rng, actions(mdp)),
                                  failure_penalty = 1)
      if return_orig
-         return mdp, policy, adv_mdp
+         return mdp, policy_table, adv_mdp
      end
      adv_mdp
 end
 
 # Constructs (and optionally saves) a set of tasks using a specified random seed
-function generate_task_set(seed, N; tprob_test = 0.7, folder = nothing, save = false, lzeros = 2)
+function generate_task_set(seed, N; tprob_test = 0.7, folder = nothing, save = false, lzeros = 2, keep_map = true, verbose = false)
     try mkdir(folder) catch end
-    rng = MersenneTwister(seed)
+    task_rng = MersenneTwister(seed)
+    map_rng = MersenneTwister(seed)
     tasks = []
     for i=1:N
         println("Generating task ", i, " in ", folder)
-        t = generate_task(task_rng = rng, verbose = false, tprob_test = tprob_test)
-        push!(tasks, t)
+        mdp, policy_table, advmdp = generate_task(task_rng = task_rng, map_rng = keep_map ? MersenneTwister(0) : map_rng, verbose = verbose, tprob_test = tprob_test, return_orig = true)
+        push!(tasks, advmdp)
         if save
-            name = string(folder, "/task_", lpad(i, lzeros, "0"), ".jls")
-            println("writing ", name)
-            serialize(name, t)
+            subfolder = string(folder, "/task_", lpad(i, lzeros, "0"),"/")
+            try mkdir(subfolder) catch end
+            serialize(string(subfolder, "mdp"), mdp)
+            serialize(string(subfolder, "policy_table"), policy_table)
+            serialize(string(subfolder, "advmdp"), advmdp)
+            draw(PDF(string(subfolder, "mdp.pdf")), POMDPModelTools.render(mdp, initialstate(mdp)))
+            draw(PDF(string(subfolder, "advmdp.pdf")), POMDPModelTools.render(advmdp, initialstate(advmdp)))
         end
     end
     tasks
