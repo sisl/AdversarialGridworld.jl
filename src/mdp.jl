@@ -20,7 +20,7 @@ const A = Symbol
     failure_penalty = 5
 end
 
-valid_pos(mdp, pos::GWPos) = !(pos in mdp.walls || any((pos .> mdp.size) .| (pos .< GWPos(1,1))))
+valid_pos(mdp::AdversarialGridworldMDP, pos::GWPos) = !(pos in mdp.walls || any((pos .> mdp.size) .| (pos .< GWPos(1,1))))
 
 function random_valid_pos(mdp::AdversarialGridworldMDP, rng::AbstractRNG = Random.GLOBAL_RNG, exclude = [], max_trials = 1000)
     trial = 0
@@ -36,7 +36,18 @@ function random_valid_pos(mdp::AdversarialGridworldMDP, rng::AbstractRNG = Rando
 function POMDPs.initialstate(mdp::AdversarialGridworldMDP, rng::AbstractRNG = Random.GLOBAL_RNG)
     ego = random_valid_pos(mdp, rng)
     adversary = random_valid_pos(mdp, rng, [ego])
-    S(ego..., adversary...)
+    Deterministic(S(ego..., adversary...))
+end
+
+function POMDPs.states(mdp::AdversarialGridworldMDP)
+    lengths = (mdp.size[1], mdp.size[2], mdp.size[1], mdp.size[2])
+    ss = S[]
+    for ijk in CartesianIndices(lengths)
+        s = S(ijk.I...)
+        valid_pos(mdp, ego_pos(s)) && valid_pos(mdp, adversary_pos(s)) &&  push!(ss, s)
+    end
+    push!(ss, S(-1,-1,-1,-1))
+    ss
 end
 
 POMDPs.actions(mdp::AdversarialGridworldMDP) = syma

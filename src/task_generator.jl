@@ -10,11 +10,20 @@ end
 
 # Converts a policy to a table that maps states to actions
 function policy_to_table(mdp, policy)
-    lengths = (mdp.size[1], mdp.size[2], mdp.size[1], mdp.size[2])
-    policy_table = Array{Symbol, 4}(undef, lengths...)
-    for ijk in CartesianIndices(lengths)
-        policy_table[ijk.I...] = action(policy, S(ijk.I...))
+    if mdp isa AdversarialGridworldMDP
+        lengths = (mdp.size[1], mdp.size[2], mdp.size[1], mdp.size[2])
+        policy_table = Array{Symbol, 4}(undef, lengths...)
+        for ijk in CartesianIndices(lengths)
+            policy_table[ijk.I...] = action(policy, S(ijk.I...))
+        end
+    else
+        lengths = (mdp.size[1], mdp.size[2], mdp.size[1], mdp.size[2], mdp.size[1], mdp.size[2])
+        policy_table = Array{Symbol}(undef, lengths...)
+        for ijk in CartesianIndices(lengths)
+            policy_table[ijk.I...] = action(policy, S2(ijk.I...))[1]
+        end
     end
+
     policy_table
 end
 
@@ -25,7 +34,7 @@ action_values(pol, s) = [value(pol, s, a) for a in actions(pol.mdp)]
 # relies on POMDPs.value(pol, s, a)
 function value_to_table(policy)
     mdp = policy.mdp
-    lengths = (mdp.size[1], mdp.size[2], mdp.size[1], mdp.size[2])
+    lengths = (mdp.size[1],mdp.size[2], mdp.size[1], mdp.size[2])
     policy_table = Array{Float64, 5}(undef, lengths..., length(actions(mdp)))
     for ijk in CartesianIndices(lengths)
         policy_table[ijk.I..., :] .= action_values(policy, S(ijk.I...))
@@ -36,7 +45,11 @@ end
 # Solves the mdp for the optimal policy using LocalApproximation value iteration
 function solve_for_policy(mdp; n_generative_samples = 10, max_iterations = 100, verbose = true)
     Nx, Ny = mdp.size
-    grid = RectangleGrid(1:Nx, 1:Ny, 1:Nx, 1:Ny)
+    if mdp isa AdversarialGridworldMDP
+        grid = RectangleGrid(1:Nx, 1:Ny, 1:Nx, 1:Ny)
+    else
+        grid = RectangleGrid(1:Nx, 1:Ny, 1:Nx, 1:Ny, 1:Nx, 1:Ny)
+    end
     solver = LocalApproximationValueIterationSolver(
                     LocalGIFunctionApproximator(grid),
                     is_mdp_generative = true,
@@ -61,7 +74,8 @@ function generate_task(;map_rng = MersenneTwister(0),
                         n_generative_samples_train = 10,
                         max_iterations_train = 100,
                         verbose = true,
-                        return_orig = false)
+                        return_orig = false,
+                        type = AdversarialGridworldMDP)
     rewards = Dict{GWPos, Float64}()
     perturbed_rewards = Dict{GWPos, Float64}()
     for i = 1:N_rewards
@@ -80,7 +94,7 @@ function generate_task(;map_rng = MersenneTwister(0),
     end
 
     # Create the mdp that will be solved for the policy (perturbed rewards)
-    mdp = AdversarialGridworldMDP(rewards = perturbed_rewards,
+    mdp = type(rewards = perturbed_rewards,
                              walls = walls,
                              tprob = tprob_train,
                              failure_penalty = perturbed_penalty)
@@ -93,7 +107,7 @@ function generate_task(;map_rng = MersenneTwister(0),
 
     # Construct the adversarial mdp with the solved ego policy with a reward that
     # is consistent across tasks
-    adv_mdp = AdversarialGridworldMDP(rewards = rewards,
+    adv_mdp = type(rewards = rewards,
                                  walls = walls,
                                  agent_gets_action = :adversary,
                                  tprob = 1,

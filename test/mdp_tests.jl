@@ -20,8 +20,8 @@ amdp = AdversarialGridworldMDP(agent_gets_action = :adversary, rewards = Dict(GW
 @test mdp.tprob == 0.7
 @test mdp.agent_gets_action == :ego
 @test amdp.agent_gets_action == :adversary
-@test mdp.adversary_policy(initialstate(mdp)) isa Symbol
-@test mdp.ego_policy(initialstate(mdp)) isa Symbol
+@test mdp.adversary_policy(rand(initialstate(mdp))) isa Symbol
+@test mdp.ego_policy(rand(initialstate(mdp))) isa Symbol
 @test mdp.failure_penalty == 5
 
 # Test valid_pos
@@ -40,7 +40,7 @@ for i=1:100
 end
 
 for i=1:100
-    s = initialstate(mdp)
+    s = rand(initialstate(mdp))
     @test ego_pos(s) != adversary_pos(s)
 end
 
